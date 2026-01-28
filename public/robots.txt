@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /
+Allow: /demo
+Allow: /pricing
+Allow: /register
+Allow: /login
+
+# Block admin and private pages
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /progress
+Disallow: /ielts
+Disallow: /interview
+
+# Block API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://rretoriq.com/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# Block common bot paths
+Disallow: /wp-admin/
+Disallow: /admin/
+Disallow: /.git/
+Disallow: /node_modules/

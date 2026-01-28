@@ -1,0 +1,4 @@
+<!-- Favicon placeholder file -->
+<!-- In production, replace this with actual favicon.png -->
+<!-- Recommended sizes: 16x16, 32x32, 48x48, 64x64, 128x128, 256x256 -->
+<!-- This file should be replaced with a proper PNG favicon -->

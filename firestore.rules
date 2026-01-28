@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users collection with seat protection
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+
+      // Users can write their own data EXCEPT seats field
+      allow create, update: if isOwner(userId) &&
+                              !request.resource.data.keys().hasAny(['seats']);
+
+      // Only backend (Cloud Functions with admin SDK) can write seats
+      // Client cannot modify seats field at all
+      allow delete: if isOwner(userId);
+    }
+
+    // Extended user profile details
+    match /user_profiles/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+    }
+
+    // Public institutions directory (read-only from client)
+    match /institutions/{institutionId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Session storage used by firebaseSessionService
+    match /sessions/{sessionId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /userProgress/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+    }
+
+    match /answers/{answerId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Legacy / alternate collection names used by AnswerStorageService
+    match /interview_sessions/{sessionId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /interview_answers/{answerId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /user_progress/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+    }
+
+    // Feedback: allow create from clients, but do not allow reading feedback from clients
+    match /feedback/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
